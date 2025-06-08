@@ -1,0 +1,87 @@
+1. Edit User:
+- Cập nhật backend để cho phép sửa user
++ Folder controllers => file user-controller.js thêm:
+const updateUser = async (req, res) => {
+	try {
+		const updated = await User.findByIdAndUpdate(
+	req.params.userId,
+	{ $set: req.body },
+	{ new: true }
+);
+if (!updated) {
+	return res.status(404).json({
+	success: false,
+	message: “Cannot load user”
+})
+}
+res.json({
+	success: true,
+	data: updated
+})
+} catch (err) {
+	res.status(500).json({
+	success: false,
+	message: “Server error”,
+});
+}
+}
+
+export thêm updateUser
++ Folder routes => file UserRouter.js
+Nhớ import
+Thêm một dòng router.put(“/:userId”, updateUser);
+- Thêm button vào TopBar:
+<button variant="contained" color="primary" onClick={() => setIsEditing(true)}
+>
+Edit Info
+</button>
+- Các hook:
+const [isEditing, setIsEditing] = useState(false);
+const [formData, setFormData] = useState({
+	first_name: “”,
+	last_name: “”,
+	location: “”,
+	occupation: “”,
+	description: “”
+});
+- Thêm form:
+{isEditing && (
+	<Box sx={{display: “flex”, flexDirection: “column”, gap: 1, backgroundColor: “#fff”, padding: 2, borderRadius: 3, boxShadow: 3, width: “300px”, marginTop: “20px”, }}>
+	<input type=”text” placeholder=”First Name” value={formData.first_name} onChange={handleChangeFN} />
+	<input type="text" placeholder="Last Name" value={formData.last_name} onChange={handleChangeLN} />
+	<input type="text" placeholder="Location" value={formData.location} onChange={handleChangeL} />
+	<input type="text" placeholder="Occupation" value={formData.occupation} onChange={handleChangeO} />
+	<textarea placeholder=”Description” value={formData.description} onChange={handleChangeDes} />
+	<Button variant="contained" onClick={handleSave}>
+	Save
+</Button>
+	<Button variant="outlined" onClick={() => setIsEditing(false)}>
+	Cancel
+</Button>
+</Box>
+)}
+- các hàm handle:
+const handleChangeFN = (e) => {
+	setFormData({…formData, first_name: e.target.value});
+	console.log(e.target.value);
+}
+Các cái kia tương tự
+Import thêm updateUserService
+const handleSave = async () => {
+	try{
+		const res = await updateUserService(payload._id, formData);
+		if (res.success) {
+			alert(“Update success.”);
+			setIsEditing(false);
+} else {
+		alert(“Update fail!”);
+}
+	} catch (err) {
+		alert(“Fail!”);
+}
+};
+- tìm folder services => file index.js
+export async function updateUserService(userId, updateData) {
+	const {data} = await axiosInstance.put(`/api/user/${userId}`, updatedData);
+	return data;
+}
